@@ -1,20 +1,18 @@
 var Comment = React.createClass({
 	rawMarkup: function() {
 		var md = new Remarkable();
-		var rawMarkup = md.render(this.props.children.toString());
-		return {__html: rawMarkup};
+		return {__html: md.render(this.props.children.toString())};
 	},
 
 	render: function() {
 		return (
-			<div>
-				<h2>{this.props.author}</h2>
-				<span dangerouslySetInnerHTML={this.rawMarkup()} />
-			</div>
+				<div>
+					<h2>{this.props.author}</h2>
+					<span dangerouslySetInnerHTML={this.rawMarkup()} />
+				</div>
 			);
 	}
 });
-
 
 var CommentList = React.createClass({
 	render: function() {
@@ -25,7 +23,6 @@ var CommentList = React.createClass({
 				</Comment>
 			);
 		});
-
 		return (
 			<div>
 				{commentNodes}
@@ -39,7 +36,7 @@ var CommentForm = React.createClass({
 		return {author: '', content: ''};
 	},
 
-	handleAuthorChange: function(e) {
+	handleAuhtorChange: function(e) {
 		this.setState({author: e.target.value});
 	},
 
@@ -49,9 +46,9 @@ var CommentForm = React.createClass({
 
 	handleSubmit: function(e) {
 		e.preventDefault();
-		var author = this.state.author.trim();
-		var content = this.state.content.trim();
-		if(!author || !content)	return;
+		var author = this.state.author;
+		var content = this.state.content;
+		if(!author || !content) return;
 		this.props.onCommentSubmit({author:author, content:content});
 		this.setState({author:'', content:''});
 	},
@@ -59,8 +56,8 @@ var CommentForm = React.createClass({
 	render: function() {
 		return (
 			<form onSubmit={this.handleSubmit}>
-				<input type='text' placeholder='your name' onChange={this.handleAuthorChange} value={this.state.author} />
-				<input type='text' placeholder='your content' onChange={this.handleContentChange} value={this.state.content} />
+				<input type='text' value={this.state.author} placeholder='your name' onChange={this.handleAuhtorChange} />
+				<input type='text' value={this.state.content} placeholder='your content' onChange={this.handleContentChange} />
 				<input type='submit' value='post' />
 			</form>
 		);
@@ -72,23 +69,23 @@ var CommentBox = React.createClass({
 		return {comments: []};
 	},
 
+	componentDidMount: function() {
+		this.loadCommentsFromServer();
+		setInterval(this.loadCommentsFromServer, this.props.pollInterval);
+	},
+
 	loadCommentsFromServer: function() {
 		$.ajax({
 			url: this.props.url,
 			dataType: 'json',
 			cache: false,
 			success: function(comments) {
-				this.setState({comments:comments});
+				this.setState({comments: comments});
 			}.bind(this),
 			error: function(xhr, status, err) {
 				console.error(this.props.url, status, err.toString());
 			}
 		});
-	},
-
-	componentDidMount: function() {
-		this.loadCommentsFromServer();
-		setInterval(this.loadCommentsFromServer, this.props.pollInterval);
 	},
 
 	handleCommentSubmit: function(comment) {
@@ -97,14 +94,14 @@ var CommentBox = React.createClass({
 		$.ajax({
 			url: this.props.url,
 			type: 'POST',
-			dataType: 'json',
 			data: comment,
+			dataType: 'json',
 			success: function(comments) {
 				this.setState({comments:comments});
 			}.bind(this),
 			error: function(xhr, status, err) {
 				console.error(this.props.url, status, err.toString());
-			}.bind(this)
+			}
 		});
 	},
 
@@ -120,6 +117,6 @@ var CommentBox = React.createClass({
 });
 
 ReactDOM.render(
-	<CommentBox url="/api/comments" pollInterval={2000} />,
+	<CommentBox url='/api/comments' pollInterval={2000} />,
 	document.getElementById('content')
 );
