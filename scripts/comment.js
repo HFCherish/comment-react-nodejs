@@ -1,29 +1,31 @@
 var Comment = React.createClass({
-	rawMarkUp: function() {
+	rawMarkup: function() {
 		var md = new Remarkable();
-		var rawMarkUp = md.render(this.props.children.toString());
-		return {__html: rawMarkUp};
+		var rawMarkup = md.render(this.props.children.toString());
+		return {__html: rawMarkup};
 	},
 
 	render: function() {
 		return (
 			<div>
 				<h2>{this.props.author}</h2>
-				<span dangerouslySetInnerHTML={this.rawMarkUp()} />
+				<span dangerouslySetInnerHTML={this.rawMarkup()} />
 			</div>
 			);
 	}
 });
 
+
 var CommentList = React.createClass({
 	render: function() {
-		var commentNodes = this.props.comments.map(function(comment) {
+		var commentNodes = this.props.comments.map(comment => {
 			return (
 				<Comment author={comment.author} key={comment.id}>
 					{comment.content}
 				</Comment>
 			);
 		});
+
 		return (
 			<div>
 				{commentNodes}
@@ -34,10 +36,7 @@ var CommentList = React.createClass({
 
 var CommentForm = React.createClass({
 	getInitialState: function() {
-		return {
-			author: '',
-			content: ''
-		};
+		return {author: '', content: ''};
 	},
 
 	handleAuthorChange: function(e) {
@@ -53,32 +52,20 @@ var CommentForm = React.createClass({
 		var author = this.state.author.trim();
 		var content = this.state.content.trim();
 		if(!author || !content)	return;
-
-		this.props.onSubmitComment({author: author, content: content});
+		this.props.onCommentSubmit({author:author, content:content});
 		this.setState({author:'', content:''});
 	},
 
 	render: function() {
 		return (
 			<form onSubmit={this.handleSubmit}>
-				<input
-					placeholder = "your name"
-					type = "text"
-					value = {this.state.author}
-					onChange = {this.handleAuthorChange}
-				/>
-				<input
-					placeholder = "your comment"
-					type = "text"
-					value = {this.state.content}
-					onChange = {this.handleContentChange}
-				/>
-				<input type = "submit" value = "post" />
+				<input type='text' placeholder='your name' onChange={this.handleAuthorChange} value={this.state.author} />
+				<input type='text' placeholder='your content' onChange={this.handleContentChange} value={this.state.content} />
+				<input type='submit' value='post' />
 			</form>
 		);
 	}
-})
-
+});
 
 var CommentBox = React.createClass({
 	getInitialState: function() {
@@ -89,12 +76,13 @@ var CommentBox = React.createClass({
 		$.ajax({
 			url: this.props.url,
 			dataType: 'json',
+			cache: false,
 			success: function(comments) {
-				this.setState({comments: comments});
+				this.setState({comments:comments});
 			}.bind(this),
 			error: function(xhr, status, err) {
-				console.error(this.props.url, status, err);
-			}.bind(this)
+				console.error(this.props.url, status, err.toString());
+			}
 		});
 	},
 
@@ -103,20 +91,19 @@ var CommentBox = React.createClass({
 		setInterval(this.loadCommentsFromServer, this.props.pollInterval);
 	},
 
-	handleSubmitComment: function(comment) {
+	handleCommentSubmit: function(comment) {
 		comment.id = Date.now();
-		var newComments = this.state.comments.concat([comment]);
-		this.setState({comments: newComments});
+		this.setState({comments: this.state.comments.concat([comment])});
 		$.ajax({
 			url: this.props.url,
 			type: 'POST',
-			data: comment,
 			dataType: 'json',
+			data: comment,
 			success: function(comments) {
-				this.setState({comments: comments});
+				this.setState({comments:comments});
 			}.bind(this),
 			error: function(xhr, status, err) {
-				console.error(this.props.url, status, err);
+				console.error(this.props.url, status, err.toString());
 			}.bind(this)
 		});
 	},
@@ -125,10 +112,10 @@ var CommentBox = React.createClass({
 		return (
 			<div>
 				<h1>Comments</h1>
-				<CommentList comments = {this.state.comments} />
-				<CommentForm onSubmitComment = {this.handleSubmitComment} />
+				<CommentList comments={this.state.comments} />
+				<CommentForm onCommentSubmit={this.handleCommentSubmit} />
 			</div>
-			);
+		);
 	}
 });
 

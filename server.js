@@ -1,10 +1,10 @@
-var fs = require('fs');
+var fs=require('fs');
 var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
 
 var app = express();
-var COMMENTS_FILE = path.join(__dirname, 'comments.json');
+var COMMENTS_FILE = path.join(__dirname, "comments.json");
 
 app.set('port', (process.env.PORT || 3000));
 
@@ -34,7 +34,7 @@ app.post('/api/comments', function(req, res) {
 			console.error(err);
 			process.exit(1);
 		}
-		comments = JSON.parse(data);
+		var comments = JSON.parse(data);
 		var newComment = {
 			id: Date.now(),
 			author: req.body.author,
@@ -44,14 +44,13 @@ app.post('/api/comments', function(req, res) {
 		fs.writeFile(COMMENTS_FILE, JSON.stringify(comments, null, 4), function(err) {
 			if (err) {
 				console.error(err);
-				console.log('the file does not exists');
-				process.exit(1);
+				process.exit(1);	
 			}
+			res.json(comments);
 		});
-		res.json(comments);
 	});
 });
 
 app.listen(app.get('port'), function() {
-	console.log('server started: http://localhost:' + app.get('port') + '/');
+	console.log('server has started: http://localhost:' + app.get('port') + '/');
 });
