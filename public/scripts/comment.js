@@ -6,23 +6,24 @@ var Comment = React.createClass({
 
 	render: function() {
 		return (
-				<div>
-					<h2>{this.props.author}</h2>
-					<span dangerouslySetInnerHTML={this.rawMarkup()} />
-				</div>
-			);
+			<div>
+				<h2>{this.props.author}</h2>
+				<span dangerouslySetInnerHTML={this.rawMarkup()} />
+			</div>
+		);
 	}
 });
 
 var CommentList = React.createClass({
 	render: function() {
-		var commentNodes = this.props.comments.map(comment => {
+		var commentNodes = this.props.comments.map(function(comment) {
 			return (
 				<Comment author={comment.author} key={comment.id}>
 					{comment.content}
 				</Comment>
 			);
 		});
+
 		return (
 			<div>
 				{commentNodes}
@@ -33,15 +34,7 @@ var CommentList = React.createClass({
 
 var CommentForm = React.createClass({
 	getInitialState: function() {
-		return {author: '', content: ''};
-	},
-
-	handleAuhtorChange: function(e) {
-		this.setState({author: e.target.value});
-	},
-
-	handleContentChange: function(e) {
-		this.setState({content: e.target.value});
+		return {author:'', content:''};
 	},
 
 	handleSubmit: function(e) {
@@ -53,11 +46,19 @@ var CommentForm = React.createClass({
 		this.setState({author:'', content:''});
 	},
 
+	handleAuthorChange: function(e) {
+		this.setState({author: e.target.value});
+	},
+
+	handleContentChange: function(e) {
+		this.setState({content: e.target.value});
+	},
+
 	render: function() {
 		return (
 			<form onSubmit={this.handleSubmit}>
-				<input type='text' value={this.state.author} placeholder='your name' onChange={this.handleAuhtorChange} />
-				<input type='text' value={this.state.content} placeholder='your content' onChange={this.handleContentChange} />
+				<input type='text' placeholder='your name' value={this.state.author} onChange={this.handleAuthorChange} />
+				<input type='text' placeholder='your content' value={this.state.content} onChange={this.handleContentChange} />
 				<input type='submit' value='post' />
 			</form>
 		);
@@ -66,7 +67,7 @@ var CommentForm = React.createClass({
 
 var CommentBox = React.createClass({
 	getInitialState: function() {
-		return {comments: []};
+		return {comments:[]};
 	},
 
 	componentDidMount: function() {
@@ -80,11 +81,11 @@ var CommentBox = React.createClass({
 			dataType: 'json',
 			cache: false,
 			success: function(comments) {
-				this.setState({comments: comments});
+				this.setState({comments:comments});
 			}.bind(this),
 			error: function(xhr, status, err) {
 				console.error(this.props.url, status, err.toString());
-			}
+			}.bind(this)
 		});
 	},
 
@@ -94,14 +95,14 @@ var CommentBox = React.createClass({
 		$.ajax({
 			url: this.props.url,
 			type: 'POST',
-			data: comment,
 			dataType: 'json',
+			data: comment,
 			success: function(comments) {
 				this.setState({comments:comments});
 			}.bind(this),
 			error: function(xhr, status, err) {
 				console.error(this.props.url, status, err.toString());
-			}
+			}.bind(this)
 		});
 	},
 
